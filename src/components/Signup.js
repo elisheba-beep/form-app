@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import InputField from "./InputField";
-import { handleSignupSubmit } from "../functions/handleSubmit";
 
 const Signup = ({ onSwitch }) => {
   const [formData, setFormData] = useState({
@@ -11,24 +10,33 @@ const Signup = ({ onSwitch }) => {
   });
   const [errors, setErrors] = useState({});
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
-  };
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
     setErrors({ ...errors, [e.target.id]: "" });
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    let newErrors = {};
+
+    if (!formData.username) newErrors.username = "Username is required.";
+    if (!/\S+@\S+\.\S+/.test(formData.email))
+      newErrors.email = "Valid email is required.";
+    if (formData.password.length < 6)
+      newErrors.password = "Password needs 6+ characters.";
+    if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match.";
+
+    if (Object.keys(newErrors).length > 0) return setErrors(newErrors);
+
+    alert("Signup successful!");
+    setFormData({ username: "", email: "", password: "", confirmPassword: "" });
+  };
+
   return (
     <div className="inner-container">
       <h1>Sign Up</h1>
-      <form
-        onSubmit={(e) =>
-          handleSignupSubmit(e, formData, validateEmail, setErrors, setFormData)
-        }
-      >
+      <form onSubmit={handleSubmit}>
         <InputField
           label="Username"
           id="username"
